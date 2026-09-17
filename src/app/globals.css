@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-nunito), system-ui, -apple-system, sans-serif;
+
+  /* It's Not Gossip brand */
+  --color-brand: #7e639c;
+  --color-brand-dark: #5f4a7d;
+  --color-brand-deep: #453357;
+  --color-brand-soft: #c9bcd9;
+  --color-ink: #4b4453;
+  --color-ink-soft: #6f6580;
+  --color-lav: #f2eef7;
+  --color-lav-deep: #e5ddf0;
+  --color-pink: #d479b2;
+  --color-pink-dark: #b95d98;
+  --color-pink-soft: #f9edf5;
+  --color-ok: #2e7d5b;
+  --color-ok-bg: #e3f2eb;
+  --color-warn: #b3474d;
+  --color-warn-bg: #fbe9ea;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-lav);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Certificate printing: hide everything except the certificate */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #certificate,
+  #certificate * {
+    visibility: visible;
+  }
+  #certificate {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    box-shadow: none !important;
+  }
+  @page {
+    margin: 12mm;
+  }
+}
