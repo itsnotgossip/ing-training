@@ -10,21 +10,12 @@ import { DownloadCertificateButton } from "@/components/DownloadCertificateButto
 
 export default async function CertificatePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { slug } = await params;
   const mod = getModule(slug);
   if (!mod) notFound();
-
-  // Design-review preview: renders the certificate without having completed the
-  // module. Development only, so a real certificate can never be faked on the
-  // live site. Remove alongside the sample dashboard card before go-live.
-  const preview =
-    process.env.NODE_ENV !== "production" &&
-    (await searchParams).preview === "1";
 
   const supabase = await createClient();
   const {
@@ -46,15 +37,16 @@ export default async function CertificatePage({
       .maybeSingle(),
   ]);
 
-  if (!progress?.completed_at && !preview) redirect(`/modules/${slug}`);
+  if (!progress?.completed_at) redirect(`/modules/${slug}`);
 
-  const completedDate = new Date(
-    progress?.completed_at ?? Date.now(),
-  ).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const completedDate = new Date(progress.completed_at).toLocaleDateString(
+    "en-GB",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    },
+  );
 
   return (
     // Same stripped-back treatment as the sign-in pages: no site header, just
@@ -69,12 +61,6 @@ export default async function CertificatePage({
             size="lg"
             className="mb-8 justify-center print:hidden"
           />
-          {preview && (
-            <p className="mb-5 rounded-xl border-2 border-warn bg-warn-bg px-5 py-3 text-center text-sm font-bold text-warn">
-              Preview only. This module has not been completed, so this is not a
-              real certificate.
-            </p>
-          )}
           <div
             id="certificate"
             className="rounded-lg border-[6px] border-double border-brand bg-white px-9 py-11 text-center shadow-[0_2px_14px_rgba(70,45,115,0.1)]"
@@ -112,7 +98,7 @@ export default async function CertificatePage({
 
           <div className="mt-6 flex justify-center print:hidden">
             <DownloadCertificateButton
-              href={`/modules/${slug}/certificate/download${preview ? "?preview=1" : ""}`}
+              href={`/modules/${slug}/certificate/download`}
             />
           </div>
         </div>

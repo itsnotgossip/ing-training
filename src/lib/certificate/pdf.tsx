@@ -107,19 +107,6 @@ const styles = StyleSheet.create({
   },
   date: { fontSize: 11, color: INK_SOFT },
   footer: { fontSize: 9, color: INK_SOFT, marginTop: 30 },
-  // Sits in the empty band below the content so it stamps the page without
-  // obscuring the wording being reviewed.
-  watermark: {
-    position: "absolute",
-    bottom: 70,
-    left: 0,
-    right: 0,
-    textAlign: "center",
-    fontSize: 54,
-    fontWeight: 800,
-    color: "#ece6f3",
-    letterSpacing: 10,
-  },
 });
 
 export type CertificateData = {
@@ -127,8 +114,6 @@ export type CertificateData = {
   salonName?: string;
   moduleTitle: string;
   completedDate: string;
-  /** Stamps the page so a preview can never pass as a real certificate. */
-  preview?: boolean;
 };
 
 export function CertificateDocument({
@@ -136,7 +121,6 @@ export function CertificateDocument({
   salonName,
   moduleTitle,
   completedDate,
-  preview = false,
 }: CertificateData) {
   return (
     <Document
@@ -147,8 +131,6 @@ export function CertificateDocument({
       <Page size="A4" style={styles.page}>
         <View style={styles.frameOuter}>
           <View style={styles.frameInner}>
-            {preview && <Text style={styles.watermark}>PREVIEW</Text>}
-
             <Image style={styles.logo} src={logoPath} />
             <Text style={styles.eyebrow}>it&apos;s not gossip</Text>
             <Text style={styles.heading}>Certificate of Completion</Text>

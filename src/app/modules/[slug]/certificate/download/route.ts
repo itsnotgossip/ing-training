@@ -24,13 +24,6 @@ export async function GET(
   const mod = getModule(slug);
   if (!mod) return new Response("Not found", { status: 404 });
 
-  // Mirrors the preview flag on the certificate page: development only, so a
-  // real certificate can never be generated for an unfinished module in
-  // production. Remove alongside the sample dashboard card before go-live.
-  const preview =
-    process.env.NODE_ENV !== "production" &&
-    new URL(request.url).searchParams.get("preview") === "1";
-
   const supabase = await createClient();
   const {
     data: { user },
@@ -51,18 +44,19 @@ export async function GET(
       .maybeSingle(),
   ]);
 
-  if (!progress?.completed_at && !preview) {
+  if (!progress?.completed_at) {
     return new Response("Module not completed", { status: 403 });
   }
 
   const fullName = profile?.full_name || "Certificate holder";
-  const completedDate = new Date(
-    progress?.completed_at ?? Date.now(),
-  ).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const completedDate = new Date(progress.completed_at).toLocaleDateString(
+    "en-GB",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    },
+  );
 
   const pdf = await renderToBuffer(
     CertificateDocument({
@@ -70,7 +64,6 @@ export async function GET(
       salonName: profile?.salon_name || undefined,
       moduleTitle: mod.title,
       completedDate,
-      preview,
     }),
   );
 
