@@ -55,7 +55,7 @@ Either way, ALSO do the template change for **Reset password** above, so the "fo
 In Terminal:
 
 ```
-cd "/Users/sarah/Documents/ING Training/ing-training"
+cd "path/to/ing-training"
 export PATH="$HOME/.local/node/bin:$PATH"
 npm run dev
 ```
@@ -68,7 +68,7 @@ Open http://localhost:3000 and create a test account. Complete the module and ch
 
 ```sql
 update public.profiles set is_admin = true
-where id = (select id from auth.users where email = 'sarahmorran21@hotmail.co.uk');
+where id = (select id from auth.users where email = 'you@example.com');
 ```
 
 2. Log out and back in on the site. You'll now see an **Admin** link in the header with every user, their progress, before and after scores, and a CSV download.

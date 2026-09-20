@@ -25,7 +25,7 @@ Online training platform for [It's Not Gossip](https://www.itsnotgossip.org) (Re
 ## Local development
 
 ```bash
-export PATH="$HOME/.local/node/bin:$PATH"   # Node lives here on Sarah's Mac
+export PATH="$HOME/.local/node/bin:$PATH"   # only needed if Node is installed here
 npm run dev
 ```
 
