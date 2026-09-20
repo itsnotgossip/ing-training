@@ -1,11 +1,21 @@
 import type { Block } from "@/lib/modules/types";
 import { Rich, renderInline } from "@/components/Rich";
+import { ChevronDownIcon } from "@/components/icons";
+import { ExpandableTile } from "@/components/ExpandableTile";
+import { cardClass } from "@/lib/ui";
+
+// Purple counterpart to cardClass for the emphasised variants.
+const purpleCardClass =
+  "rounded-2xl bg-brand text-white shadow-[0_2px_10px_rgba(70,45,115,0.08)]";
+
+const tileTitleClass = "mb-1 font-bold text-brand-dark";
+const tileBodyClass = "text-sm leading-relaxed text-ink";
 
 export function BlockRenderer({ block }: { block: Block }) {
   switch (block.kind) {
     case "lead":
       return (
-        <div className="mb-4 text-center text-lg font-bold text-brand-dark">
+        <div className="mb-5 text-lg font-bold leading-snug text-brand-dark">
           <Rich text={block.body} />
         </div>
       );
@@ -13,13 +23,13 @@ export function BlockRenderer({ block }: { block: Block }) {
     case "card":
       return (
         <div
-          className={`mb-4 rounded-2xl p-6 shadow-[0_2px_10px_rgba(70,45,115,0.08)] ${
+          className={`mb-4 p-6 ${
             block.variant === "purple"
-              ? "bg-brand text-white"
-              : "bg-white text-ink"
+              ? purpleCardClass
+              : `${cardClass} text-ink`
           } ${block.align === "center" ? "text-center" : ""}`}
         >
-          <Rich text={block.body} className="mb-3 last:mb-0" />
+          <Rich text={block.body} className="mb-3 leading-relaxed last:mb-0" />
         </div>
       );
 
@@ -28,61 +38,25 @@ export function BlockRenderer({ block }: { block: Block }) {
         <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {block.items.map((item, i) =>
             item.more ? (
-              <details
+              <ExpandableTile
                 key={i}
-                className="group rounded-2xl bg-white p-5 shadow-[0_2px_8px_rgba(70,45,115,0.08)] transition [&_summary]:list-none"
-              >
-                <summary className="cursor-pointer">
-                  {item.emoji && (
-                    <span className="mb-2 block text-2xl">{item.emoji}</span>
-                  )}
-                  {item.title && (
-                    <h3 className="mb-1 font-extrabold text-brand-dark">
-                      {item.title}
-                    </h3>
-                  )}
-                  <p className="text-sm text-ink-soft">
-                    {renderInline(item.body)}
-                  </p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-pink-dark">
-                    <span className="group-open:hidden">Tap to learn more</span>
-                    <span className="hidden group-open:inline">Show less</span>
-                    <span className="transition group-open:rotate-45">＋</span>
-                  </span>
-                </summary>
-                <p className="mt-3 border-t border-lav-deep pt-3 text-sm text-ink">
-                  {renderInline(item.more)}
-                </p>
-              </details>
+                title={item.title}
+                body={item.body}
+                more={item.more}
+              />
             ) : (
-              <div
-                key={i}
-                className="rounded-2xl bg-white p-5 shadow-[0_2px_8px_rgba(70,45,115,0.08)]"
-              >
-                {item.emoji && (
-                  <span className="mb-2 block text-2xl">{item.emoji}</span>
-                )}
-                {item.title && (
-                  <h3 className="mb-1 font-extrabold text-brand-dark">
-                    {item.title}
-                  </h3>
-                )}
-                <p className="text-sm text-ink-soft">
-                  {renderInline(item.body)}
-                </p>
+              <div key={i} className={`${cardClass} p-5`}>
+                {item.title && <h3 className={tileTitleClass}>{item.title}</h3>}
+                <p className={tileBodyClass}>{renderInline(item.body)}</p>
               </div>
-            )
+            ),
           )}
         </div>
       );
 
     case "note":
       return (
-        <div
-          className={`mb-4 rounded-r-xl border-l-4 border-pink bg-pink-soft px-5 py-4 text-[0.95rem] ${
-            block.align === "center" ? "text-center" : ""
-          }`}
-        >
+        <div className="mb-4 rounded-2xl border-2 border-pink-light bg-pink-soft px-5 py-4 leading-relaxed">
           <Rich text={block.body} />
         </div>
       );
@@ -90,8 +64,8 @@ export function BlockRenderer({ block }: { block: Block }) {
     case "quote":
       return (
         <div
-          className={`mb-4 rounded-2xl p-7 shadow-[0_2px_10px_rgba(70,45,115,0.08)] ${
-            block.variant === "purple" ? "bg-brand" : "bg-white"
+          className={`mb-4 p-7 ${
+            block.variant === "purple" ? purpleCardClass : cardClass
           }`}
         >
           <blockquote
@@ -103,7 +77,7 @@ export function BlockRenderer({ block }: { block: Block }) {
           </blockquote>
           <cite
             className={`mt-3 block text-sm font-bold not-italic ${
-              block.variant === "purple" ? "text-[#f0c3e0]" : "text-pink-dark"
+              block.variant === "purple" ? "text-pink-light" : "text-pink-dark"
             }`}
           >
             {block.cite}
@@ -116,21 +90,18 @@ export function BlockRenderer({ block }: { block: Block }) {
         <div className="mb-4">
           <div className="mb-3 grid gap-3 sm:grid-cols-3">
             {block.items.map((s, i) => (
-              <div
-                key={i}
-                className="rounded-2xl bg-brand p-6 text-center text-white"
-              >
-                <span className="block text-3xl font-extrabold leading-tight">
+              <div key={i} className={`${purpleCardClass} p-6 text-center`}>
+                <span className="block text-3xl font-bold leading-tight">
                   {s.n}
                 </span>
-                <span className="mt-1 block text-sm text-[#ded4ec]">
+                <span className="mt-1 block text-sm leading-snug text-white/85">
                   {s.d}
                 </span>
               </div>
             ))}
           </div>
           {block.source && (
-            <p className="text-center text-xs text-ink-soft">{block.source}</p>
+            <p className="text-xs text-ink-soft">{block.source}</p>
           )}
         </div>
       );
@@ -139,17 +110,12 @@ export function BlockRenderer({ block }: { block: Block }) {
       return (
         <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {block.items.map((item, i) => (
-            <div
-              key={i}
-              className="rounded-2xl bg-white p-5 text-center shadow-[0_2px_8px_rgba(70,45,115,0.08)]"
-            >
-              <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-pink font-extrabold text-white">
+            <div key={i} className={`${cardClass} p-5 text-center`}>
+              <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-pink font-bold text-white">
                 {i + 1}
               </div>
-              <h3 className="mb-1 font-extrabold text-brand-dark">
-                {item.title}
-              </h3>
-              <p className="text-sm text-ink-soft">{item.body}</p>
+              <h3 className={tileTitleClass}>{item.title}</h3>
+              <p className={tileBodyClass}>{item.body}</p>
             </div>
           ))}
         </div>
@@ -160,12 +126,14 @@ export function BlockRenderer({ block }: { block: Block }) {
         <div className="mb-4 grid gap-3 sm:grid-cols-2">
           {block.pairs.map((pair, i) => (
             <div key={i} className="contents">
-              <div className="rounded-xl bg-white px-5 py-4 font-semibold italic text-brand-dark shadow-[0_2px_8px_rgba(70,45,115,0.08)]">
+              <div
+                className={`${cardClass} px-5 py-4 font-semibold italic leading-relaxed text-brand-dark`}
+              >
                 “{pair.hear}”
               </div>
-              <div className="rounded-xl bg-brand px-5 py-4 text-white">
+              <div className={`${purpleCardClass} px-5 py-4 leading-relaxed`}>
                 “{pair.respond}”
-                <em className="mt-1 block text-xs not-italic text-[#ded4ec]">
+                <em className="mt-2 block text-xs not-italic leading-snug text-white/80">
                   {pair.why}
                 </em>
               </div>
@@ -176,15 +144,20 @@ export function BlockRenderer({ block }: { block: Block }) {
 
     case "details":
       return (
-        <details className="mb-4 rounded-2xl bg-white px-6 py-5 shadow-[0_2px_8px_rgba(70,45,115,0.08)]">
-          <summary className="cursor-pointer font-extrabold text-brand">
+        <details
+          className={`group mb-4 ${cardClass} transition open:border-brand-soft [&_summary::-webkit-details-marker]:hidden [&_summary]:list-none`}
+        >
+          <summary className="flex cursor-pointer items-center justify-between gap-4 px-6 py-5 font-bold text-brand">
             {block.summary}
+            <ChevronDownIcon className="h-4 w-4 shrink-0 transition group-open:rotate-180" />
           </summary>
-          {block.paragraphs.map((p, i) => (
-            <p key={i} className="mt-3 text-[0.95rem]">
-              {renderInline(p)}
-            </p>
-          ))}
+          <div className="border-t-2 border-lav-deep px-6 pb-6 pt-4">
+            {block.paragraphs.map((p, i) => (
+              <p key={i} className="mt-3 leading-relaxed text-ink first:mt-0">
+                {renderInline(p)}
+              </p>
+            ))}
+          </div>
         </details>
       );
   }

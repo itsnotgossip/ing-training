@@ -1,15 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Step, TrainingModule } from "@/lib/modules/types";
 import { BlockRenderer } from "@/components/BlockRenderer";
-import { QuickExit } from "@/components/QuickExit";
-import { HelplineBar } from "@/components/HelplineBar";
+import { HeroBand, SiteHeader, type HeaderUser } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
+import { ModuleMinutes } from "@/components/ModuleMinutes";
 import { Rich } from "@/components/Rich";
+import { CertificateIcon, CheckIcon, CrossIcon } from "@/components/icons";
+import { brandPillBtnClass, cardClass, pillBtnClass } from "@/lib/ui";
 
 type Props = {
   module: TrainingModule;
@@ -18,6 +20,8 @@ type Props = {
   initialQuizCorrect: Record<string, boolean>;
   initialSurveysDone: { pre: boolean; post: boolean };
   alreadyCompleted: boolean;
+  // Shown in the shared header's account navigation.
+  headerUser?: HeaderUser;
   // Preview mode: no database writes, nothing is saved.
   preview?: boolean;
 };
@@ -31,6 +35,7 @@ export function ModulePlayer({
   initialQuizCorrect,
   initialSurveysDone,
   alreadyCompleted,
+  headerUser,
   preview = false,
 }: Props) {
   const router = useRouter();
@@ -38,7 +43,13 @@ export function ModulePlayer({
   const steps = mod.steps;
 
   const [cur, setCur] = useState(
-    Math.max(0, Math.min(initialStep, steps.length - 1))
+    Math.max(0, Math.min(initialStep, steps.length - 1)),
+  );
+  // current_step is stored as a high-water mark: the furthest step this user
+  // has ever reached. Stepping back to re-read an earlier page must not lower
+  // it, or the percentage on the dashboard would go backwards.
+  const furthestStep = useRef(
+    Math.max(0, Math.min(initialStep, steps.length - 1)),
   );
   // "stepIdx-questionIdx" -> answered correctly
   const [quizCorrect, setQuizCorrect] = useState(initialQuizCorrect);
@@ -54,27 +65,28 @@ export function ModulePlayer({
   const saveProgress = useCallback(
     (step: number, correct: Record<string, boolean>) => {
       if (preview) return;
+      if (step > furthestStep.current) furthestStep.current = step;
       void supabase
         .from("module_progress")
         .upsert(
           {
             user_id: userId,
             module_slug: mod.slug,
-            current_step: step,
+            current_step: furthestStep.current,
             answers: correct,
             updated_at: new Date().toISOString(),
           },
-          { onConflict: "user_id,module_slug" }
+          { onConflict: "user_id,module_slug" },
         )
         .then(({ error }) => {
           if (error) {
             setSaveError(
-              `Your progress isn't saving (${error.code || "error"}): ${error.message}`
+              `Your progress isn't saving (${error.code || "error"}): ${error.message}`,
             );
           }
         });
     },
-    [supabase, userId, mod.slug, preview]
+    [supabase, userId, mod.slug, preview],
   );
 
   const markComplete = useCallback(async () => {
@@ -114,10 +126,7 @@ export function ModulePlayer({
   const go = useCallback(
     (delta: number) => {
       setCur((prev) => {
-        const target = Math.max(
-          0,
-          Math.min(prev + delta, steps.length - 1)
-        );
+        const target = Math.max(0, Math.min(prev + delta, steps.length - 1));
         if (delta > 0 && !stepSatisfied(steps[prev], prev)) return prev;
         if (target !== prev) {
           saveProgress(target, quizCorrect);
@@ -127,7 +136,7 @@ export function ModulePlayer({
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [steps, quizCorrect, surveysDone, saveProgress]
+    [steps, quizCorrect, surveysDone, saveProgress],
   );
 
   useEffect(() => {
@@ -178,7 +187,7 @@ export function ModulePlayer({
     if (!browserUser) {
       setSurveySaving(false);
       setSaveError(
-        "You appear to be signed out in this browser. Please log out and log back in, then try again."
+        "You appear to be signed out in this browser. Please log out and log back in, then try again.",
       );
       return;
     }
@@ -192,118 +201,143 @@ export function ModulePlayer({
         phase,
         answers,
       },
-      { onConflict: "user_id,module_slug,phase" }
+      { onConflict: "user_id,module_slug,phase" },
     );
     setSurveySaving(false);
     if (!error) {
       setSurveysDone((d) => ({ ...d, [phase]: true }));
       setSurveyDraft({});
     } else {
-      setSaveError(`Could not save (${error.code || "error"}): ${error.message}`);
+      setSaveError(
+        `Could not save (${error.code || "error"}): ${error.message}`,
+      );
     }
   }
 
   const pct = Math.round((cur / (steps.length - 1)) * 100);
 
   return (
-    <div className="flex min-h-screen flex-col pb-16">
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader user={headerUser} />
       {preview && (
-        <div className="bg-pink px-4 py-1.5 text-center text-xs font-extrabold text-white">
+        <div className="bg-pink px-4 py-1.5 text-center text-xs font-bold text-white">
           Preview mode: nothing is saved. Accounts, saved progress and
           certificates switch on once Supabase is set up.
         </div>
       )}
-      {/* Top bar */}
-      <header className="sticky top-0 z-50 flex items-center gap-3 bg-white px-4 py-2 shadow-[0_2px_8px_rgba(70,45,115,0.08)] sm:px-5">
-        <Link
-          href="/dashboard"
-          className="flex shrink-0 items-center gap-2"
-          title="Back to my modules"
-        >
-          <Image src="/logo.png" alt="It's Not Gossip" width={42} height={36} />
-        </Link>
-        <span className="hidden truncate text-sm font-bold text-brand sm:block">
-          {mod.title}
-        </span>
-        <div className="ml-auto flex items-center gap-2">
-          <Link
-            href="/dashboard"
-            className="rounded-full border-2 border-brand-soft px-4 py-1.5 text-sm font-bold text-brand transition hover:border-brand"
-          >
-            Save &amp; exit
-          </Link>
-          <QuickExit />
-        </div>
-      </header>
 
-      {/* Progress */}
-      <div className="sticky top-[54px] z-40 bg-lav px-4 pb-1.5 pt-2.5">
-        <div className="mx-auto h-2 max-w-3xl overflow-hidden rounded-full bg-lav-deep">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-brand to-pink transition-all duration-300"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <p className="mx-auto mt-1 max-w-3xl text-right text-[0.7rem] font-bold text-brand">
-          {cur + 1} of {steps.length} · {step.navTitle}
-        </p>
-      </div>
+      <main className="flex-1">
+        {/* Fixed module banner, matching the dashboard and account heroes. The
+            per-step heading and progress live in the content area below. */}
+        <HeroBand>
+          <div className="max-w-4xl">
+            <div className="mb-4">
+              <ModuleMinutes minutes={mod.minutes} />
+            </div>
+            <h1 className="text-4xl font-bold leading-none text-balance text-brand sm:text-5xl">
+              {mod.title}
+            </h1>
+          </div>
+        </HeroBand>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-10 pt-4">
-        {saveError && step.type !== "survey" && (
-          <p className="mb-4 rounded-xl bg-warn-bg px-4 py-3 text-sm font-semibold text-warn">
-            {saveError}
-          </p>
-        )}
-        <StepView
-          key={cur}
-          step={step}
-          stepIdx={cur}
-          mod={mod}
-          quizCorrect={quizCorrect}
-          wrongPicks={wrongPicks}
-          onAnswer={answerQuiz}
-          surveysDone={surveysDone}
-          surveyDraft={surveyDraft}
-          setSurveyDraft={setSurveyDraft}
-          surveySaving={surveySaving}
-          submitSurvey={submitSurvey}
-          saveError={saveError}
-          completed={completed}
-          preview={preview}
-        />
+        <div className="site-container py-10 sm:py-12">
+          {/* Left-aligned, so the reading column starts on the same edge as
+              the hero above it and the rest of the site. */}
+          <div className="max-w-3xl">
+            <div className="mb-8">
+              <p className="mb-3 text-sm font-bold uppercase text-pink">
+                {step.kicker}
+              </p>
+              {/* The opening page's title is already the banner heading, so
+                  its tagline becomes the page heading instead. */}
+              <h2 className="mb-4 text-3xl font-bold leading-tight text-balance text-brand sm:text-4xl">
+                {step.title !== mod.title
+                  ? step.title
+                  : step.type === "hero"
+                    ? step.subtitle
+                    : step.title}
+              </h2>
+              {step.type === "hero" && step.title !== mod.title && (
+                <p className="text-lg italic leading-snug text-ink">
+                  {step.subtitle}
+                </p>
+              )}
+              <div className="mt-8 text-sm font-bold text-brand">
+                Step {cur + 1} of {steps.length}
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-lav-deep">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-brand to-pink transition-all duration-300"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </div>
 
-        {/* Nav buttons */}
-        <div className="mt-6 flex justify-between gap-3">
-          <button
-            onClick={() => go(-1)}
-            disabled={cur === 0}
-            className="rounded-full border-2 border-brand-soft px-6 py-2.5 font-extrabold text-brand transition hover:border-brand disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-          >
-            ← Back
-          </button>
-          {cur < steps.length - 1 && (
-            <button
-              onClick={() => go(1)}
-              disabled={!canNext}
-              className="rounded-full bg-brand px-7 py-2.5 font-extrabold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-            >
-              Next →
-            </button>
-          )}
+            {saveError && step.type !== "survey" && (
+              <p className="mb-4 rounded-xl bg-warn-bg px-4 py-3 text-sm font-semibold text-warn">
+                {saveError}
+              </p>
+            )}
+            <StepView
+              key={cur}
+              step={step}
+              stepIdx={cur}
+              mod={mod}
+              quizCorrect={quizCorrect}
+              wrongPicks={wrongPicks}
+              onAnswer={answerQuiz}
+              surveysDone={surveysDone}
+              surveyDraft={surveyDraft}
+              setSurveyDraft={setSurveyDraft}
+              surveySaving={surveySaving}
+              submitSurvey={submitSurvey}
+              saveError={saveError}
+              completed={completed}
+              preview={preview}
+            />
+
+            {/* Navigation */}
+            <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t-2 border-lav-deep pt-6">
+              <button
+                onClick={() => go(-1)}
+                disabled={cur === 0}
+                className="cursor-pointer rounded-full border-2 border-brand-soft px-6 py-3 text-xs font-bold uppercase tracking-wide text-brand transition hover:border-brand hover:bg-lav disabled:invisible"
+              >
+                Back
+              </button>
+              <div className="flex flex-wrap items-center gap-4">
+                <Link
+                  href="/dashboard"
+                  className="text-sm font-semibold text-ink-soft transition hover:text-pink"
+                  title="Your progress is saved automatically"
+                >
+                  Save and exit
+                </Link>
+                {cur < steps.length - 1 && (
+                  <button
+                    onClick={() => go(1)}
+                    disabled={!canNext}
+                    className={`${brandPillBtnClass} px-7`}
+                  >
+                    Next
+                  </button>
+                )}
+              </div>
+            </div>
+            {!canNext && cur < steps.length - 1 && (
+              <p className="mt-2 text-right text-xs font-semibold text-ink-soft">
+                {step.type === "quiz"
+                  ? "Answer every question correctly to continue."
+                  : step.type === "survey"
+                    ? "Answer and save the questions to continue."
+                    : ""}
+              </p>
+            )}
+          </div>
         </div>
-        {!canNext && cur < steps.length - 1 && (
-          <p className="mt-2 text-right text-xs font-semibold text-ink-soft">
-            {step.type === "quiz"
-              ? "Answer every question correctly to continue."
-              : step.type === "survey"
-                ? "Answer and save the questions to continue."
-                : ""}
-          </p>
-        )}
       </main>
 
-      <HelplineBar />
+      <SiteFooter />
     </div>
   );
 }
@@ -332,9 +366,7 @@ function StepView({
   onAnswer: (stepIdx: number, qIdx: number, optIdx: number) => void;
   surveysDone: { pre: boolean; post: boolean };
   surveyDraft: Record<string, number>;
-  setSurveyDraft: React.Dispatch<
-    React.SetStateAction<Record<string, number>>
-  >;
+  setSurveyDraft: React.Dispatch<React.SetStateAction<Record<string, number>>>;
   surveySaving: boolean;
   submitSurvey: (phase: "pre" | "post") => void;
   saveError: string | null;
@@ -343,19 +375,14 @@ function StepView({
 }) {
   if (step.type === "hero") {
     return (
-      <div className="animate-[fadeIn_0.35s_ease]">
-        <div className="rounded-3xl bg-brand px-8 py-12 text-center text-white">
-          <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f0c3e0]">
-            {step.kicker}
-          </p>
-          <h1 className="mb-3 text-3xl font-extrabold leading-tight sm:text-4xl">
-            {step.title}
-          </h1>
-          <p className="italic text-[#ded4ec]">{step.subtitle}</p>
-        </div>
-        <div className="mt-4">
-          {step.blocks?.map((b, i) => <BlockRenderer key={i} block={b} />)}
-        </div>
+      <div>
+        {/* The module summary lives here rather than in the banner. */}
+        <p className="mb-6 text-lg leading-relaxed text-ink">
+          {mod.description}
+        </p>
+        {step.blocks?.map((b, i) => (
+          <BlockRenderer key={i} block={b} />
+        ))}
       </div>
     );
   }
@@ -363,39 +390,36 @@ function StepView({
   if (step.type === "content" || step.type === "finish") {
     return (
       <div>
-        <p className="mb-1.5 text-xs font-extrabold uppercase tracking-[0.18em] text-pink-dark">
-          {step.kicker}
-        </p>
-        <h2 className="mb-4 text-2xl font-extrabold text-brand">
-          {step.title}
-        </h2>
         {step.blocks.map((b, i) => (
           <BlockRenderer key={i} block={b} />
         ))}
         {step.type === "finish" && (
-          <div className="mt-6 rounded-2xl bg-white p-8 text-center shadow-[0_2px_10px_rgba(70,45,115,0.08)]">
+          <div className={`mt-6 ${cardClass} p-8 text-center`}>
             {completed ? (
               <>
-                <p className="mb-1 text-3xl">🎉</p>
-                <h3 className="mb-2 text-xl font-extrabold text-brand">
+                <CertificateIcon className="mx-auto mb-3 h-10 w-10 text-pink" />
+                <h3 className="mb-2 text-xl font-bold text-brand">
                   Module complete!
                 </h3>
                 {preview ? (
                   <p className="text-ink-soft">
-                    In the real thing, the learner's certificate is created
-                    here with their name and today's date, ready to print or
+                    In the real thing, the learner's certificate is created here
+                    with their name and today's date, ready to print or
                     download.
                   </p>
                 ) : (
                   <>
                     <p className="mb-5 text-ink-soft">
-                      Your certificate is ready. You can view, print or
-                      download it any time from your dashboard.
+                      Your certificate is ready. You can view, print or download
+                      it any time from your dashboard.
                     </p>
                     <Link
                       href={`/modules/${mod.slug}/certificate`}
-                      className="inline-block rounded-full bg-pink px-8 py-3 font-extrabold text-white transition hover:bg-pink-dark"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${pillBtnClass} gap-2 px-8`}
                     >
+                      <CertificateIcon />
                       Get my certificate
                     </Link>
                   </>
@@ -415,52 +439,68 @@ function StepView({
   if (step.type === "quiz") {
     return (
       <div>
-        <p className="mb-1.5 text-xs font-extrabold uppercase tracking-[0.18em] text-pink-dark">
-          {step.kicker}
-        </p>
-        <h2 className="mb-4 text-2xl font-extrabold text-brand">
-          {step.title}
-        </h2>
-        {step.intro?.map((b, i) => <BlockRenderer key={i} block={b} />)}
+        {step.intro?.map((b, i) => (
+          <BlockRenderer key={i} block={b} />
+        ))}
         {step.questions.map((q, qi) => {
           const key = `${stepIdx}-${qi}`;
           const solved = Boolean(quizCorrect[key]);
           const wrongs = wrongPicks[key] ?? [];
           return (
-            <div
-              key={qi}
-              className="mb-4 rounded-2xl bg-white p-6 shadow-[0_2px_10px_rgba(70,45,115,0.08)]"
-            >
-              <h3 className="mb-3 font-extrabold text-brand-dark">{q.q}</h3>
-              {q.opts.map((opt, oi) => {
-                const isCorrectPick = solved && oi === q.a;
-                const isWrongPick = wrongs.includes(oi);
-                return (
-                  <button
-                    key={oi}
-                    disabled={solved || isWrongPick}
-                    onClick={() => onAnswer(stepIdx, qi, oi)}
-                    className={`mb-2 block w-full rounded-xl border-2 px-4 py-3 text-left text-[0.95rem] transition ${
-                      isCorrectPick
-                        ? "border-ok bg-ok-bg font-bold text-ok"
-                        : isWrongPick
-                          ? "border-warn bg-warn-bg text-warn"
-                          : solved
-                            ? "border-transparent bg-lav text-ink-soft"
-                            : "border-transparent bg-lav text-ink hover:border-brand-soft cursor-pointer"
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                );
-              })}
+            <div key={qi} className={`mb-4 ${cardClass} p-6`}>
+              <p className="mb-2 text-xs font-bold uppercase tracking-wide text-pink">
+                Question {qi + 1} of {step.questions.length}
+              </p>
+              <h3 className="mb-1 text-lg font-bold leading-snug text-brand-dark">
+                {q.q}
+              </h3>
+              <p className="mb-4 text-sm text-ink-soft">Choose one answer.</p>
+              <div className="flex flex-col gap-2">
+                {q.opts.map((opt, oi) => {
+                  const isCorrectPick = solved && oi === q.a;
+                  const isWrongPick = wrongs.includes(oi);
+                  const locked = solved || isWrongPick;
+                  // Each option reads as a radio choice: a ring on the left
+                  // that fills with a tick or cross once it has been picked.
+                  const rowCls = isCorrectPick
+                    ? "border-ok bg-ok-bg text-ok"
+                    : isWrongPick
+                      ? "border-warn bg-warn-bg text-warn"
+                      : solved
+                        ? "border-lav-deep bg-white text-ink-soft opacity-60"
+                        : "cursor-pointer border-brand-soft bg-white text-ink hover:border-brand hover:bg-lav focus-visible:border-brand focus-visible:bg-lav";
+                  const ringCls = isCorrectPick
+                    ? "border-ok bg-ok text-white"
+                    : isWrongPick
+                      ? "border-warn bg-warn text-white"
+                      : "border-brand-soft bg-white";
+                  return (
+                    <button
+                      key={oi}
+                      type="button"
+                      disabled={locked}
+                      onClick={() => onAnswer(stepIdx, qi, oi)}
+                      className={`flex w-full items-start gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm font-semibold leading-snug outline-none transition disabled:cursor-not-allowed ${rowCls}`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition ${ringCls}`}
+                      >
+                        {isCorrectPick && <CheckIcon />}
+                        {isWrongPick && <CrossIcon />}
+                      </span>
+                      <span>{opt}</span>
+                    </button>
+                  );
+                })}
+              </div>
               {wrongs.length > 0 && !solved && (
-                <p className="mt-1 rounded-xl bg-warn-bg px-4 py-2.5 text-sm font-semibold text-warn">
-                  Not quite. Have another go!
+                <p className="mt-3 rounded-xl bg-warn-bg px-4 py-2.5 text-sm font-semibold text-warn">
+                  Not quite. Have another go.
                 </p>
               )}
               {solved && (
-                <div className="mt-1 rounded-xl bg-ok-bg px-4 py-3 text-sm text-ok">
+                <div className="mt-3 rounded-xl bg-ok-bg px-4 py-3 text-sm leading-relaxed text-ok">
                   {q.fb}
                 </div>
               )}
@@ -474,19 +514,16 @@ function StepView({
   // Survey step
   const done = surveysDone[step.phase];
   const allAnswered = mod.surveyQuestions.every(
-    (q) => surveyDraft[q.id] !== undefined
+    (q) => surveyDraft[q.id] !== undefined,
   );
   return (
     <div>
-      <p className="mb-1.5 text-xs font-extrabold uppercase tracking-[0.18em] text-pink-dark">
-        {step.kicker}
-      </p>
-      <h2 className="mb-4 text-2xl font-extrabold text-brand">{step.title}</h2>
-      <div className="rounded-2xl bg-white p-6 shadow-[0_2px_10px_rgba(70,45,115,0.08)]">
-        <Rich text={step.intro} className="mb-5 text-ink-soft" />
+      <div className={`${cardClass} p-6`}>
+        <Rich text={step.intro} className="mb-5 leading-relaxed text-ink" />
         {done ? (
-          <p className="rounded-xl bg-ok-bg px-4 py-3 font-bold text-ok">
-            ✓ Thank you, your answers have been saved. Click Next to continue.
+          <p className="flex items-center gap-2 rounded-xl bg-ok-bg px-4 py-3 font-bold text-ok">
+            <CheckIcon className="h-4 w-4 shrink-0" />
+            Thank you, your answers have been saved. Click Next to continue.
           </p>
         ) : (
           <>
@@ -500,7 +537,7 @@ function StepView({
                       onClick={() =>
                         setSurveyDraft((d) => ({ ...d, [q.id]: n }))
                       }
-                      className={`h-10 w-10 rounded-full border-2 text-sm font-extrabold transition cursor-pointer ${
+                      className={`h-10 w-10 rounded-full border-2 text-sm font-bold transition cursor-pointer ${
                         surveyDraft[q.id] === n
                           ? "border-brand bg-brand text-white"
                           : "border-brand-soft bg-white text-brand hover:border-brand"
@@ -510,7 +547,7 @@ function StepView({
                     </button>
                   ))}
                 </div>
-                <div className="mt-1 flex justify-between text-[0.68rem] font-semibold text-ink-soft">
+                <div className="mt-1 flex justify-between text-xs font-semibold text-ink-soft">
                   <span>0 = not at all</span>
                   <span>10 = extremely</span>
                 </div>
@@ -519,7 +556,7 @@ function StepView({
             <button
               onClick={() => submitSurvey(step.phase)}
               disabled={!allAnswered || surveySaving}
-              className="rounded-full bg-pink px-7 py-2.5 font-extrabold text-white transition hover:bg-pink-dark disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+              className={`${pillBtnClass} px-7`}
             >
               {surveySaving ? "Saving…" : "Save my answers"}
             </button>

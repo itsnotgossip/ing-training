@@ -5,7 +5,7 @@ import "./globals.css";
 const nunito = Nunito({
   variable: "--font-nunito",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -20,7 +20,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-GB" className={`${nunito.variable} h-full antialiased`}>
+    <html
+      lang="en-GB"
+      data-scroll-behavior="smooth"
+      className={`${nunito.variable} h-full antialiased`}
+    >
       <body className="min-h-screen flex flex-col">{children}</body>
     </html>
   );

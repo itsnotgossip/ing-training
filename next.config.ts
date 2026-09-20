@@ -6,6 +6,16 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
+
+  // The certificate PDF reads the Nunito files and the logo from disk at
+  // request time. Those reads are dynamic, so tracing cannot spot them and the
+  // files have to be pulled into the serverless bundle explicitly.
+  outputFileTracingIncludes: {
+    "/modules/[slug]/certificate/download": [
+      "src/lib/certificate/fonts/**/*.ttf",
+      "public/logo.png",
+    ],
+  },
 };
 
 export default nextConfig;

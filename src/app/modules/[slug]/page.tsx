@@ -18,19 +18,25 @@ export default async function ModulePage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: progress }, { data: surveys }] = await Promise.all([
-    supabase
-      .from("module_progress")
-      .select("current_step, answers, completed_at")
-      .eq("user_id", user.id)
-      .eq("module_slug", slug)
-      .maybeSingle(),
-    supabase
-      .from("survey_responses")
-      .select("phase")
-      .eq("user_id", user.id)
-      .eq("module_slug", slug),
-  ]);
+  const [{ data: profile }, { data: progress }, { data: surveys }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("full_name, is_admin")
+        .eq("id", user.id)
+        .single(),
+      supabase
+        .from("module_progress")
+        .select("current_step, answers, completed_at")
+        .eq("user_id", user.id)
+        .eq("module_slug", slug)
+        .maybeSingle(),
+      supabase
+        .from("survey_responses")
+        .select("phase")
+        .eq("user_id", user.id)
+        .eq("module_slug", slug),
+    ]);
 
   const phases = new Set((surveys ?? []).map((s) => s.phase));
 
@@ -38,10 +44,11 @@ export default async function ModulePage({
     <ModulePlayer
       module={mod}
       userId={user.id}
+      headerUser={{
+        isAdmin: profile?.is_admin,
+      }}
       initialStep={progress?.current_step ?? 0}
-      initialQuizCorrect={
-        (progress?.answers as Record<string, boolean>) ?? {}
-      }
+      initialQuizCorrect={(progress?.answers as Record<string, boolean>) ?? {}}
       initialSurveysDone={{
         pre: phases.has("pre"),
         post: phases.has("post"),

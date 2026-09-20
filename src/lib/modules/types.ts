@@ -7,9 +7,9 @@ export type Block =
       kind: "tiles";
       // `more` makes a box tap-to-expand: `body` is the calm surface line,
       // `more` is the depth revealed on tap.
-      items: { emoji?: string; title?: string; body: string; more?: string }[];
+      items: { title?: string; body: string; more?: string }[];
     }
-  | { kind: "note"; body: string; align?: "center" }
+  | { kind: "note"; body: string }
   | { kind: "quote"; text: string; cite: string; variant?: "purple" }
   | { kind: "stats"; items: { n: string; d: string }[]; source?: string }
   | { kind: "numbered"; items: { title: string; body: string }[] }
@@ -74,9 +74,9 @@ export type SurveyQuestion = {
 export type TrainingModule = {
   slug: string;
   title: string;
-  subtitle: string;
   description: string;
-  minutes: string;
+  // Rough length of the module, in minutes. Rendered by <ModuleMinutes>.
+  minutes: number;
   surveyQuestions: SurveyQuestion[];
   steps: Step[];
 };

@@ -12,13 +12,28 @@
   --color-ink-soft: #6f6580;
   --color-lav: #f2eef7;
   --color-lav-deep: #e5ddf0;
+  --color-grey-band: #eeecf3;
   --color-pink: #d479b2;
   --color-pink-dark: #b95d98;
   --color-pink-soft: #f9edf5;
+  --color-pink-light: #f0c3e0;
   --color-ok: #2e7d5b;
   --color-ok-bg: #e3f2eb;
   --color-warn: #b3474d;
   --color-warn-bg: #fbe9ea;
+}
+
+/* Matches the 1170px Bootstrap-style container used on itsnotgossip.org */
+@utility site-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1170px;
+  padding-inline: 15px;
+}
+
+/* Soft grey-to-white band used behind heroes, FAQs and the auth pages */
+@utility hero-gradient {
+  background-image: linear-gradient(to bottom, var(--color-grey-band), #ffffff, var(--color-grey-band));
 }
 
 html {
@@ -26,9 +41,10 @@ html {
 }
 
 body {
-  background: var(--color-lav);
+  background: #ffffff;
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-weight: 500;
 }
 
 /* Certificate printing: hide everything except the certificate */
