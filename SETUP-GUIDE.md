@@ -75,15 +75,32 @@ where id = (select id from auth.users where email = 'you@example.com');
 
 ## Step 7: Put it on the internet
 
-1. Create a free account at [github.com](https://github.com) and one at [vercel.com](https://vercel.com) (sign up to Vercel *with* your GitHub account).
-2. Push this folder to a new GitHub repository (ask Claude to do this part for you, it's one command once you're logged in to GitHub).
-3. In Vercel click **Add New → Project**, pick the repository, and before deploying add the two environment variables from Step 3 (`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`).
-4. Click **Deploy**. You'll get a live URL like `ing-training.vercel.app`.
-5. Back in Supabase go to **Authentication → URL Configuration** and set **Site URL** to your live URL. Add `http://localhost:3000/**` to **Redirect URLs** so local testing keeps working.
+This is already done for It's Not Gossip, and [README.md](./README.md) records
+how the live site is wired together. Follow the steps below only if you are
+deploying a fresh copy somewhere else.
+
+1. Put the code in a GitHub repository.
+2. Create a [Vercel](https://vercel.com) account and click **Add New →
+   Project**, then pick the repository.
+3. Before deploying, add the two environment variables from Step 3,
+   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+4. Click **Deploy**. You will get an address ending `.vercel.app`.
+5. In Supabase, open **Authentication → URL Configuration**. Set **Site URL**
+   to the live address and add both it and `http://localhost:3000/**` to
+   **Redirect URLs**.
+
+Note that Vercel's free Hobby plan will not deploy a **private** repository
+owned by a GitHub **organisation**. Either make the repository public, keep it
+under a personal account, or pay for a Pro team.
 
 ## Step 8 (optional): Use your own web address
 
-In Vercel go to the project's **Settings → Domains** and add `training.itsnotgossip.org`. Vercel shows you one DNS record to add wherever itsnotgossip.org's domain is managed. Then update the Supabase Site URL to match.
+In Vercel open the project's **Settings → Domains** and add the subdomain you
+want. Vercel shows one DNS record, normally a CNAME. Add exactly that record
+wherever the domain's DNS is managed, entering only the subdomain part as the
+host name. Do not change nameservers, and do not touch existing records, or you
+risk taking the main website offline. Then update the Supabase Site URL to
+match.
 
 ---
 
