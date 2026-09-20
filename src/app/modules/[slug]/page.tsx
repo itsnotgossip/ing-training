@@ -47,7 +47,10 @@ export default async function ModulePage({
       headerUser={{
         isAdmin: profile?.is_admin,
       }}
-      initialStep={progress?.current_step ?? 0}
+      // A finished module opens at the beginning, since "Revisit module"
+      // means reading it again rather than returning to the last page.
+      initialStep={progress?.completed_at ? 0 : (progress?.current_step ?? 0)}
+      furthestStepReached={progress?.current_step ?? 0}
       initialQuizCorrect={(progress?.answers as Record<string, boolean>) ?? {}}
       initialSurveysDone={{
         pre: phases.has("pre"),

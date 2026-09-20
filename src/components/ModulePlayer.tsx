@@ -16,7 +16,12 @@ import { brandPillBtnClass, cardClass, pillBtnClass } from "@/lib/ui";
 type Props = {
   module: TrainingModule;
   userId: string;
+  // Where the player opens.
   initialStep: number;
+  // The furthest step already stored for this user. Kept separate from
+  // initialStep so that opening earlier in the module (revisiting a completed
+  // one) cannot lower the saved progress. Defaults to initialStep.
+  furthestStepReached?: number;
   initialQuizCorrect: Record<string, boolean>;
   initialSurveysDone: { pre: boolean; post: boolean };
   alreadyCompleted: boolean;
@@ -32,6 +37,7 @@ export function ModulePlayer({
   module: mod,
   userId,
   initialStep,
+  furthestStepReached,
   initialQuizCorrect,
   initialSurveysDone,
   alreadyCompleted,
@@ -49,7 +55,7 @@ export function ModulePlayer({
   // has ever reached. Stepping back to re-read an earlier page must not lower
   // it, or the percentage on the dashboard would go backwards.
   const furthestStep = useRef(
-    Math.max(0, Math.min(initialStep, steps.length - 1)),
+    Math.max(0, Math.min(furthestStepReached ?? initialStep, steps.length - 1)),
   );
   // "stepIdx-questionIdx" -> answered correctly
   const [quizCorrect, setQuizCorrect] = useState(initialQuizCorrect);

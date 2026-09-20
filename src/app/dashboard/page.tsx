@@ -9,22 +9,6 @@ import { HeroBand, SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { MODULES } from "@/lib/modules";
 
-// TEMPORARY: a fake completed module so the finished state can be reviewed
-// while only one real module exists. Delete this constant and the spread
-// below before going live.
-const SAMPLE_MODULES: ModuleCardProps[] = [
-  {
-    title: "Sample module: supporting a client after a disclosure",
-    description:
-      "A placeholder card showing how a completed module looks on the dashboard. This module does not exist yet.",
-    minutes: 15,
-    status: "completed",
-    // Points at a real module so the certificate layout can be reviewed. The
-    // preview flag is ignored in production, so this cannot mint a real one.
-    certificateHref: `/modules/${MODULES[0].slug}/certificate?preview=1`,
-  },
-];
-
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
@@ -67,9 +51,7 @@ export default async function DashboardPage() {
     };
   });
 
-  // TEMPORARY: remove along with SAMPLE_MODULES above.
-  const allCards = [...cards, ...SAMPLE_MODULES];
-  const completedCount = allCards.filter(
+  const completedCount = cards.filter(
     (c) => c.status === "completed",
   ).length;
 
@@ -94,7 +76,7 @@ export default async function DashboardPage() {
               </p>
             </div>
             <span className={`shrink-0 ${statusPillCls} bg-pink-soft text-pink-dark`}>
-              {completedCount} of {allCards.length} modules complete
+              {completedCount} of {cards.length} modules complete
             </span>
           </div>
         </HeroBand>
@@ -102,7 +84,7 @@ export default async function DashboardPage() {
         <section className="site-container py-12 sm:py-16">
           <h2 className="mb-6 text-2xl font-bold text-brand">Your modules</h2>
           <div className="grid gap-6 lg:grid-cols-2">
-            {allCards.map((card) => (
+            {cards.map((card) => (
               <ModuleCard key={card.title} {...card} />
             ))}
           </div>
