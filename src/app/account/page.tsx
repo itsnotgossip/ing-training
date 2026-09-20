@@ -78,7 +78,7 @@ export default async function AccountPage() {
               </p>
               <p className="mt-3 text-sm text-ink-soft">
                 To change the address on your account, email{" "}
-                <strong>hello@itsnotgossip.org</strong> and we will update it
+                <strong>info@itsnotgossip.org</strong> and we will update it
                 for you.
               </p>
             </Card>

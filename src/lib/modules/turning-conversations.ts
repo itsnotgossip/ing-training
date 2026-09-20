@@ -881,7 +881,7 @@ export const turningConversations: TrainingModule = {
         {
           kind: "card",
           align: "center",
-          body: "For questions or to find out more about our training:\n**hello@itsnotgossip.org** · **itsnotgossip.org**",
+          body: "For questions or to find out more about our training:\n**info@itsnotgossip.org** · **itsnotgossip.org**",
         },
       ],
     },
