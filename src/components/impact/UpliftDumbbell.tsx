@@ -72,10 +72,16 @@ export function UpliftDumbbell({ items }: { items: Uplift[] }) {
       </ul>
 
       <div className="relative mt-6 h-5 border-t-2 border-lav-deep">
-        {TICKS.map((tick) => (
+        {TICKS.map((tick, i) => (
           <span
             key={tick}
-            className="absolute top-1 -translate-x-1/2 text-xs font-bold tabular-nums text-ink-soft"
+            className={`absolute top-1 text-xs font-bold tabular-nums text-ink-soft ${
+              i === 0
+                ? ""
+                : i === TICKS.length - 1
+                  ? "-translate-x-full"
+                  : "-translate-x-1/2"
+            }`}
             style={{ left: `${(tick / MAX_SCORE) * 100}%` }}
           >
             {tick}

@@ -30,7 +30,9 @@ export function ChartCard({
   defaultOpen?: boolean;
 }) {
   return (
-    <figure className={`${cardClass} m-0 flex h-full flex-col p-6 sm:p-8`}>
+    <figure
+      className={`${cardClass} m-0 flex h-full min-w-0 flex-col p-6 sm:p-8`}
+    >
       <figcaption className="mb-6">
         <h3 className="text-xl font-bold leading-snug text-brand">{title}</h3>
         {subtitle && (
@@ -55,7 +57,7 @@ export function ChartCard({
         )}
       </figcaption>
 
-      <div className="flex flex-1 flex-col">{children}</div>
+      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
 
       {footnote && <p className="mt-4 text-xs text-ink-soft">{footnote}</p>}
 
@@ -67,7 +69,7 @@ export function ChartCard({
           View the numbers
           <ChevronDownIcon className="h-3.5 w-3.5 transition group-open:rotate-180" />
         </summary>
-        <div className="mt-4 overflow-x-auto rounded-xl bg-lav p-4 sm:p-5">
+        <div className="mt-4 overflow-x-auto rounded-xl bg-lav p-3 sm:p-5">
           {table}
         </div>
       </details>
@@ -84,14 +86,14 @@ export function DataTable({
   rows: (string | number)[][];
 }) {
   return (
-    <table className="w-full border-collapse text-left text-sm">
+    <table className="w-full min-w-[15rem] border-collapse text-left text-sm">
       <thead>
         <tr>
           {head.map((h, i) => (
             <th
               key={h}
               scope="col"
-              className={`border-b-2 border-lav-deep pb-2 pr-4 font-bold text-brand-deep ${
+              className={`border-b-2 border-lav-deep pb-2 pr-2 font-bold text-brand-deep last:pr-0 sm:pr-4 sm:last:pr-0 ${
                 i > 0 ? "text-right tabular-nums" : ""
               }`}
             >
@@ -106,7 +108,7 @@ export function DataTable({
             {row.map((cell, ci) => (
               <td
                 key={ci}
-                className={`border-b border-lav-deep py-2 pr-4 text-ink ${
+                className={`border-b border-lav-deep py-2 pr-2 text-ink last:pr-0 sm:pr-4 ${
                   ci > 0 ? "text-right tabular-nums" : ""
                 }`}
               >
