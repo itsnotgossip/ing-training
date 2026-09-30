@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { ChartCard, DataTable } from "@/components/impact/ChartCard";
 import { Funnel } from "@/components/impact/Funnel";
 import { SignupsTrend, longMonth } from "@/components/impact/SignupsTrend";
-import { StatTile } from "@/components/impact/StatTile";
+import { HeadlineStat } from "@/components/impact/HeadlineStat";
 import { UpliftDumbbell } from "@/components/impact/UpliftDumbbell";
 import { DEMO_MODE, getImpactStats } from "@/lib/impact/data";
 import { SERIES_AFTER, SERIES_BEFORE } from "@/lib/impact/palette";
@@ -71,6 +71,25 @@ export default async function ImpactPage() {
                 answers are what this page is built from.
               </p>
             </div>
+
+            <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-7 border-t-2 border-brand-soft pt-8 sm:gap-x-8 lg:grid-cols-4">
+              <HeadlineStat
+                value={stats.registered.toLocaleString("en-GB")}
+                label="Salon professionals signed up"
+              />
+              <HeadlineStat
+                value={stats.salons.toLocaleString("en-GB")}
+                label="Salons and businesses reached"
+              />
+              <HeadlineStat
+                value={stats.completed.toLocaleString("en-GB")}
+                label="Certificates earned"
+              />
+              <HeadlineStat
+                value={`+${meanGain.toFixed(1)}`}
+                label="Average confidence gain, out of 10"
+              />
+            </div>
           </div>
         </section>
 
@@ -84,34 +103,8 @@ export default async function ImpactPage() {
           </section>
         )}
 
-        {/* Headline numbers. A row of tiles, not a chart: these are single
-            values and a bar chart of four unrelated numbers would say less. */}
-        <section className="site-container py-12 sm:py-16">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <StatTile
-              value={stats.registered.toLocaleString("en-GB")}
-              label="Salon professionals signed up"
-              note="Since the training opened"
-            />
-            <StatTile
-              value={stats.salons.toLocaleString("en-GB")}
-              label="Salons and businesses reached"
-              note="Named on those accounts"
-            />
-            <StatTile
-              value={stats.completed.toLocaleString("en-GB")}
-              label="Certificates earned"
-              note={`${completionRate}% of everyone who signed up`}
-            />
-            <StatTile
-              value={`+${meanGain.toFixed(1)}`}
-              label="Average confidence gain"
-              note="Points out of 10, before to after"
-            />
-          </div>
-        </section>
-
-        {/* The headline finding. */}
+        {/* Reach and impact together: the before-and-after comparison leads,
+            with how far the training has travelled beside it. */}
         <section className="hero-gradient py-14 sm:py-16">
           <div className="site-container">
             <div className="mb-8 max-w-2xl">
@@ -123,109 +116,107 @@ export default async function ImpactPage() {
                 and again at the end. The gap between the two dots is what the
                 training changed.
               </p>
+              {respondingGain && (
+                <p className="mt-4 text-lg leading-relaxed text-ink">
+                  The largest shift is in the question that matters most in the
+                  chair: whether someone would feel able to respond if a client
+                  opened up to them. That rises from{" "}
+                  <strong className="text-brand-deep">
+                    {respondingGain.before.toFixed(1)}
+                  </strong>{" "}
+                  to{" "}
+                  <strong className="text-brand-deep">
+                    {respondingGain.after.toFixed(1)}
+                  </strong>{" "}
+                  out of 10.
+                </p>
+              )}
             </div>
 
-            <ChartCard
-              title="Self-rated knowledge and confidence, before and after"
-              subtitle="Average score out of 10, from the people who answered both times."
-              legend={[
-                { label: "Before the training", colour: SERIES_BEFORE },
-                { label: "After the training", colour: SERIES_AFTER },
-              ]}
-              footnote={`Based on ${stats.upliftSample.toLocaleString("en-GB")} people who completed both sets of questions. Only people who answered twice are counted, so both figures describe the same group.`}
-              table={
-                <DataTable
-                  head={["Question", "Before", "After", "Change"]}
-                  rows={stats.uplift.map((u) => [
-                    u.question,
-                    u.before.toFixed(1),
-                    u.after.toFixed(1),
-                    `+${(u.after - u.before).toFixed(1)}`,
-                  ])}
-                />
-              }
-            >
-              <UpliftDumbbell items={stats.uplift} />
-            </ChartCard>
-
-            {respondingGain && (
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink">
-                The largest shift is in the question that matters most in the
-                chair: whether someone would feel able to respond if a client
-                opened up to them. That rises from{" "}
-                <strong className="text-brand-deep">
-                  {respondingGain.before.toFixed(1)}
-                </strong>{" "}
-                to{" "}
-                <strong className="text-brand-deep">
-                  {respondingGain.after.toFixed(1)}
-                </strong>{" "}
-                out of 10.
-              </p>
-            )}
-          </div>
-        </section>
-
-        {/* Reach over time. */}
-        <section className="site-container py-14 sm:py-16">
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
-            <ChartCard
-              title="New sign-ups each month"
-              subtitle="How word has spread since the training opened."
-              table={
-                <DataTable
-                  head={["Month", "New sign-ups"]}
-                  rows={stats.signupsByMonth.map((p) => [
-                    longMonth(p.month),
-                    p.signups,
-                  ])}
-                />
-              }
-            >
-              <SignupsTrend points={stats.signupsByMonth} />
-            </ChartCard>
-
-            <ChartCard
-              title="From sign-up to certificate"
-              subtitle="Where people get to once they have an account."
-              footnote={
-                stats.medianMinutes
-                  ? `Half of those who finish do it in under ${stats.medianMinutes} minutes.`
-                  : undefined
-              }
-              table={
-                <DataTable
-                  head={["Stage", "People"]}
-                  rows={[
-                    ["Signed up", stats.registered],
-                    ["Started the module", stats.started],
-                    ["Earned a certificate", stats.completed],
-                  ]}
-                />
-              }
-            >
-              <Funnel
-                stages={[
-                  {
-                    label: "Signed up",
-                    value: stats.registered,
-                    note: "Created an account",
-                  },
-                  {
-                    label: "Started the module",
-                    value: stats.started,
-                    note: stats.registered
-                      ? `${Math.round((stats.started / stats.registered) * 100)}% of sign-ups`
-                      : "",
-                  },
-                  {
-                    label: "Earned a certificate",
-                    value: stats.completed,
-                    note: `${completionRate}% of sign-ups`,
-                  },
+            <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-8">
+              <ChartCard
+                title="Self-rated knowledge and confidence, before and after"
+                subtitle="Average score out of 10, from the people who answered both times."
+                legend={[
+                  { label: "Before the training", colour: SERIES_BEFORE },
+                  { label: "After the training", colour: SERIES_AFTER },
                 ]}
-              />
-            </ChartCard>
+                footnote={`Based on ${stats.upliftSample.toLocaleString("en-GB")} people who completed both sets of questions. Only people who answered twice are counted, so both figures describe the same group.`}
+                table={
+                  <DataTable
+                    head={["Question", "Before", "After", "Change"]}
+                    rows={stats.uplift.map((u) => [
+                      u.question,
+                      u.before.toFixed(1),
+                      u.after.toFixed(1),
+                      `+${(u.after - u.before).toFixed(1)}`,
+                    ])}
+                  />
+                }
+              >
+                <UpliftDumbbell items={stats.uplift} />
+              </ChartCard>
+
+              <div className="grid gap-6 lg:gap-8">
+                <ChartCard
+                  title="New sign-ups each month"
+                  subtitle="How word has spread since the training opened."
+                  table={
+                    <DataTable
+                      head={["Month", "New sign-ups"]}
+                      rows={stats.signupsByMonth.map((p) => [
+                        longMonth(p.month),
+                        p.signups,
+                      ])}
+                    />
+                  }
+                >
+                  <SignupsTrend points={stats.signupsByMonth} />
+                </ChartCard>
+
+                <ChartCard
+                  title="From sign-up to certificate"
+                  subtitle="Where people get to once they have an account."
+                  footnote={
+                    stats.medianMinutes
+                      ? `Half of those who finish do it in under ${stats.medianMinutes} minutes.`
+                      : undefined
+                  }
+                  table={
+                    <DataTable
+                      head={["Stage", "People"]}
+                      rows={[
+                        ["Signed up", stats.registered],
+                        ["Started the module", stats.started],
+                        ["Earned a certificate", stats.completed],
+                      ]}
+                    />
+                  }
+                >
+                  <Funnel
+                    stages={[
+                      {
+                        label: "Signed up",
+                        value: stats.registered,
+                        note: "Created an account",
+                      },
+                      {
+                        label: "Started the module",
+                        value: stats.started,
+                        note: stats.registered
+                          ? `${Math.round((stats.started / stats.registered) * 100)}% of sign-ups`
+                          : "",
+                      },
+                      {
+                        label: "Earned a certificate",
+                        value: stats.completed,
+                        note: `${completionRate}% of sign-ups`,
+                      },
+                    ]}
+                  />
+                </ChartCard>
+              </div>
+            </div>
           </div>
         </section>
 

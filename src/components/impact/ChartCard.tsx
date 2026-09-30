@@ -27,7 +27,7 @@ export function ChartCard({
   footnote?: string;
 }) {
   return (
-    <figure className={`${cardClass} m-0 flex h-full flex-col p-6 sm:p-8`}>
+    <figure className={`${cardClass} m-0 flex flex-col p-6 sm:p-8`}>
       <figcaption className="mb-6">
         <h3 className="text-xl font-bold leading-snug text-brand">{title}</h3>
         {subtitle && (
@@ -52,13 +52,11 @@ export function ChartCard({
         )}
       </figcaption>
 
-      {children}
+      <div className="flex flex-1 flex-col">{children}</div>
 
       {footnote && <p className="mt-4 text-xs text-ink-soft">{footnote}</p>}
 
-      <div className="h-5" aria-hidden="true" />
-
-      <details className="group mt-auto border-t-2 border-lav-deep pt-4 [&_summary::-webkit-details-marker]:hidden [&_summary]:list-none">
+      <details className="group mt-6 border-t-2 border-lav-deep pt-4 [&_summary::-webkit-details-marker]:hidden [&_summary]:list-none">
         <summary className="flex cursor-pointer items-center justify-between gap-4 text-xs font-bold uppercase tracking-wide text-pink-dark">
           View the numbers
           <ChevronDownIcon className="h-3.5 w-3.5 transition group-open:rotate-180" />
