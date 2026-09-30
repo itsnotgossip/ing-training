@@ -48,9 +48,6 @@ export default async function ImpactPage() {
       stats.uplift.length
     : 0;
 
-  const respondingGain =
-    stats.uplift.find((u) => u.id === "responding") ?? stats.uplift[0];
-
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader user={user ? { isAdmin } : undefined} />
@@ -105,36 +102,20 @@ export default async function ImpactPage() {
             with how far the training has travelled beside it. */}
         <section className="hero-gradient py-14 sm:py-16">
           <div className="site-container">
-            <div className="mb-8 max-w-2xl">
-              <h2 className="text-3xl font-bold leading-tight text-brand sm:text-4xl">
+            <div className="mx-auto mb-10 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold leading-tight text-balance text-brand sm:text-4xl">
                 People leave far more confident than they arrive
               </h2>
-              <p className="mt-4 text-lg leading-relaxed text-ink">
-                The same three questions are asked at the start of the module
-                and again at the end. The gap between the two dots is what the
-                training changed.
+              <p className="mt-4 text-lg leading-relaxed text-balance text-ink">
+                How much changes for the people who take this training, how far
+                it has spread, and how many see it through.
               </p>
-              {respondingGain && (
-                <p className="mt-4 text-lg leading-relaxed text-ink">
-                  The largest shift is in the question that matters most in the
-                  chair: whether someone would feel able to respond if a client
-                  opened up to them. That rises from{" "}
-                  <strong className="text-brand-deep">
-                    {respondingGain.before.toFixed(1)}
-                  </strong>{" "}
-                  to{" "}
-                  <strong className="text-brand-deep">
-                    {respondingGain.after.toFixed(1)}
-                  </strong>{" "}
-                  out of 10.
-                </p>
-              )}
             </div>
 
             <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-8">
               <ChartCard
                 title="Self-rated knowledge and confidence, before and after"
-                subtitle="Average score out of 10, from the people who answered both times."
+                subtitle="The same three questions, asked at the start of the module and again at the end. The gap between the dots is what the training changed."
                 legend={[
                   { label: "Before the training", colour: SERIES_BEFORE },
                   { label: "After the training", colour: SERIES_AFTER },
