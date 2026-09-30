@@ -84,7 +84,7 @@ export default async function ImpactPage() {
               />
               <HeadlineStat
                 value={`+${meanGain.toFixed(1)}`}
-                label="Confidence gain out of 10"
+                label="Confidence gain rating increase"
               />
             </div>
 

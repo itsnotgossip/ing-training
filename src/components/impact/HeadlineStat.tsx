@@ -21,7 +21,7 @@ export function HeadlineStat({
   label: string;
 }) {
   return (
-    <div className="rounded-2xl bg-linear-to-br from-white to-lav px-5 py-7 text-center shadow-[5px_5px_20px_rgba(14,14,14,0.08)]">
+    <div className="rounded-2xl bg-white px-5 py-7 text-center shadow-[5px_5px_20px_rgba(14,14,14,0.08)]">
       <p className="text-4xl font-bold leading-none text-pink-dark sm:text-5xl">
         {value}
         {suffix && <span className="text-2xl sm:text-3xl">{suffix}</span>}
