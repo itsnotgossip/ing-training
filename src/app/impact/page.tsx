@@ -56,23 +56,23 @@ export default async function ImpactPage() {
       <SiteHeader user={user ? { isAdmin } : undefined} />
 
       <main className="flex-1">
-        <section className="hero-gradient py-10 sm:py-14">
-          <div className="site-container">
-            <div className="max-w-3xl">
+        <section className="hero-gradient py-12 sm:py-16">
+          <div className="site-container text-center">
+            <div className="mx-auto max-w-3xl">
               <p className="mb-4 text-sm font-bold uppercase text-pink">
                 Our impact
               </p>
               <h1 className="text-4xl font-bold leading-none text-balance text-brand sm:text-5xl">
                 What changes when a salon knows what to look for
               </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink">
-                Every person who takes this training rates their own knowledge
-                and confidence before they start, and again at the end. Those
-                answers are what this page is built from.
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-balance text-ink">
+                Everyone who takes this training rates their knowledge and
+                confidence before and after. This page is built from their
+                answers.
               </p>
             </div>
 
-            <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-7 border-t-2 border-brand-soft pt-8 sm:gap-x-8 lg:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
               <HeadlineStat
                 value={stats.registered.toLocaleString("en-GB")}
                 label="Salon professionals signed up"
@@ -87,21 +87,19 @@ export default async function ImpactPage() {
               />
               <HeadlineStat
                 value={`+${meanGain.toFixed(1)}`}
-                label="Average confidence gain, out of 10"
+                label="Average confidence gain out of 10"
               />
             </div>
+
+            {DEMO_MODE && (
+              <p className="mx-auto mt-8 max-w-2xl rounded-2xl border-2 border-warn bg-warn-bg px-5 py-4 text-sm font-bold text-warn">
+                Demonstration data. The training has not launched yet, so every
+                figure on this page is invented to show the layout. Nothing here
+                describes real people.
+              </p>
+            )}
           </div>
         </section>
-
-        {DEMO_MODE && (
-          <section className="site-container pt-10">
-            <p className="rounded-2xl border-2 border-warn bg-warn-bg px-5 py-4 font-bold text-warn">
-              Demonstration data. The training has not launched yet, so every
-              figure on this page is invented to show the layout. Nothing here
-              describes real people.
-            </p>
-          </section>
-        )}
 
         {/* Reach and impact together: the before-and-after comparison leads,
             with how far the training has travelled beside it. */}
