@@ -9,6 +9,11 @@ import { SignupsTrend, longMonth } from "@/components/impact/SignupsTrend";
 import { HeadlineStat } from "@/components/impact/HeadlineStat";
 import { UpliftDumbbell } from "@/components/impact/UpliftDumbbell";
 import { DEMO_MODE, getImpactStats } from "@/lib/impact/data";
+import {
+  hasImpactAccess,
+  isImpactGateConfigured,
+} from "@/lib/impact/access";
+import { PasswordGate } from "@/components/impact/PasswordGate";
 import { SERIES_AFTER, SERIES_BEFORE } from "@/lib/impact/palette";
 import { pillBtnClass } from "@/lib/ui";
 
@@ -22,6 +27,12 @@ export const metadata: Metadata = {
 };
 
 export default async function ImpactPage() {
+  // Behind a shared password until the real figures are ready. Nothing below
+  // runs, and no markup is sent, until that password has been entered.
+  if (!(await hasImpactAccess())) {
+    return <PasswordGate configured={isImpactGateConfigured()} />;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
