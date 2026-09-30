@@ -18,6 +18,7 @@ export function ChartCard({
   children,
   table,
   footnote,
+  defaultOpen = false,
 }: {
   title: string;
   subtitle?: string;
@@ -25,9 +26,11 @@ export function ChartCard({
   children: React.ReactNode;
   table: React.ReactNode;
   footnote?: string;
+  /** Show the table straight away rather than behind a closed disclosure. */
+  defaultOpen?: boolean;
 }) {
   return (
-    <figure className={`${cardClass} m-0 flex flex-col p-6 sm:p-8`}>
+    <figure className={`${cardClass} m-0 flex h-full flex-col p-6 sm:p-8`}>
       <figcaption className="mb-6">
         <h3 className="text-xl font-bold leading-snug text-brand">{title}</h3>
         {subtitle && (
@@ -56,12 +59,17 @@ export function ChartCard({
 
       {footnote && <p className="mt-4 text-xs text-ink-soft">{footnote}</p>}
 
-      <details className="group mt-6 border-t-2 border-lav-deep pt-4 [&_summary::-webkit-details-marker]:hidden [&_summary]:list-none">
+      <details
+        open={defaultOpen}
+        className="group mt-auto border-t-2 border-lav-deep pt-4 [&_summary::-webkit-details-marker]:hidden [&_summary]:list-none"
+      >
         <summary className="flex cursor-pointer items-center justify-between gap-4 text-xs font-bold uppercase tracking-wide text-pink-dark">
           View the numbers
           <ChevronDownIcon className="h-3.5 w-3.5 transition group-open:rotate-180" />
         </summary>
-        <div className="mt-4 overflow-x-auto">{table}</div>
+        <div className="mt-4 overflow-x-auto rounded-xl bg-lav p-4 sm:p-5">
+          {table}
+        </div>
       </details>
     </figure>
   );

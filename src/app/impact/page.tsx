@@ -102,20 +102,21 @@ export default async function ImpactPage() {
             with how far the training has travelled beside it. */}
         <section className="hero-gradient py-14 sm:py-16">
           <div className="site-container">
-            <div className="mx-auto mb-10 max-w-2xl text-center">
+            <div className="mb-10 grid gap-4 lg:grid-cols-2 lg:items-center lg:gap-12">
               <h2 className="text-3xl font-bold leading-tight text-balance text-brand sm:text-4xl">
                 People leave far more confident than they arrive
               </h2>
-              <p className="mt-4 text-lg leading-relaxed text-balance text-ink">
+              <p className="text-lg leading-relaxed text-ink">
                 How much changes for the people who take this training, how far
                 it has spread, and how many see it through.
               </p>
             </div>
 
-            <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-8">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
               <ChartCard
                 title="Self-rated knowledge and confidence, before and after"
                 subtitle="The same three questions, asked at the start of the module and again at the end. The gap between the dots is what the training changed."
+                defaultOpen
                 legend={[
                   { label: "Before the training", colour: SERIES_BEFORE },
                   { label: "After the training", colour: SERIES_AFTER },
