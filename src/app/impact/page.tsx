@@ -83,16 +83,16 @@ export default async function ImpactPage() {
               />
               <HeadlineStat
                 value={stats.completed.toLocaleString("en-GB")}
-                label="Certificates earned"
+                label="Training certificates earned"
               />
               <HeadlineStat
                 value={`+${meanGain.toFixed(1)}`}
-                label="Average confidence gain out of 10"
+                label="Confidence gain out of 10"
               />
             </div>
 
             {DEMO_MODE && (
-              <p className="mx-auto mt-8 max-w-2xl rounded-2xl border-2 border-warn bg-warn-bg px-5 py-4 text-sm font-bold text-warn">
+              <p className="mt-5 rounded-2xl border-2 border-warn bg-warn-bg px-5 py-4 text-sm font-bold text-warn">
                 Demonstration data. The training has not launched yet, so every
                 figure on this page is invented to show the layout. Nothing here
                 describes real people.

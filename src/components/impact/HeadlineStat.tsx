@@ -26,7 +26,7 @@ export function HeadlineStat({
         {value}
         {suffix && <span className="text-2xl sm:text-3xl">{suffix}</span>}
       </p>
-      <p className="mt-4 text-xs font-bold uppercase leading-snug tracking-wide text-balance text-brand-deep">
+      <p className="mx-auto mt-4 max-w-[23ch] text-xs font-bold uppercase leading-snug tracking-wide text-balance text-brand-deep">
         {label}
       </p>
     </div>
