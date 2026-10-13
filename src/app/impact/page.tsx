@@ -9,10 +9,7 @@ import { SignupsTrend, longMonth } from "@/components/impact/SignupsTrend";
 import { HeadlineStat } from "@/components/impact/HeadlineStat";
 import { UpliftDumbbell } from "@/components/impact/UpliftDumbbell";
 import { DEMO_MODE, getImpactStats } from "@/lib/impact/data";
-import {
-  hasImpactAccess,
-  isImpactGateConfigured,
-} from "@/lib/impact/access";
+import { hasImpactAccess, isImpactGateConfigured } from "@/lib/impact/access";
 import { PasswordGate } from "@/components/impact/PasswordGate";
 import { SERIES_AFTER, SERIES_BEFORE } from "@/lib/impact/palette";
 import { pillBtnClass } from "@/lib/ui";
@@ -39,13 +36,15 @@ export default async function ImpactPage() {
   } = await supabase.auth.getUser();
 
   let isAdmin = false;
+  let viewerName: string | undefined;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("is_admin")
+      .select("full_name, is_admin")
       .eq("id", user.id)
       .single();
     isAdmin = Boolean(profile?.is_admin);
+    viewerName = profile?.full_name || undefined;
   }
 
   const stats = await getImpactStats();
@@ -61,7 +60,11 @@ export default async function ImpactPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader user={user ? { isAdmin } : undefined} />
+      <SiteHeader
+        user={
+          user ? { isAdmin, name: viewerName, email: user.email } : undefined
+        }
+      />
 
       <main className="flex-1">
         <section className="hero-gradient py-12 sm:py-16">

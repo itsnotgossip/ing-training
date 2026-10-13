@@ -39,7 +39,13 @@ export default async function AccountPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader user={{ isAdmin: profile?.is_admin }} />
+      <SiteHeader
+        user={{
+          isAdmin: profile?.is_admin,
+          name: profile?.full_name || undefined,
+          email: user.email,
+        }}
+      />
 
       <main className="flex-1">
         <HeroBand>
@@ -78,8 +84,8 @@ export default async function AccountPage() {
               </p>
               <p className="mt-3 text-sm text-ink-soft">
                 To change the address on your account, email{" "}
-                <strong>info@itsnotgossip.org</strong> and we will update it
-                for you.
+                <strong>info@itsnotgossip.org</strong> and we will update it for
+                you.
               </p>
             </Card>
 

@@ -6,6 +6,9 @@ import { QuickExit } from "@/components/QuickExit";
 
 export type HeaderUser = {
   isAdmin?: boolean;
+  /** Shown in the account box, so it is clear whose account this is. */
+  name?: string;
+  email?: string;
 };
 
 // The one header used across the site, laid out like itsnotgossip.org: the
@@ -38,7 +41,7 @@ export function SiteHeader({ user }: { user?: HeaderUser }) {
                   Admin
                 </Link>
               )}
-              <AccountMenu signedIn />
+              <AccountMenu signedIn name={user.name} email={user.email} />
             </nav>
           ) : (
             <nav className="ml-auto flex items-center gap-5 text-base font-semibold text-ink sm:gap-6">

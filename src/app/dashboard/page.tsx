@@ -51,13 +51,17 @@ export default async function DashboardPage() {
     };
   });
 
-  const completedCount = cards.filter(
-    (c) => c.status === "completed",
-  ).length;
+  const completedCount = cards.filter((c) => c.status === "completed").length;
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader user={{ isAdmin: profile?.is_admin }} />
+      <SiteHeader
+        user={{
+          isAdmin: profile?.is_admin,
+          name: profile?.full_name || undefined,
+          email: user.email,
+        }}
+      />
 
       <main className="flex-1">
         <HeroBand>
@@ -75,7 +79,9 @@ export default async function DashboardPage() {
                 left off.
               </p>
             </div>
-            <span className={`shrink-0 ${statusPillCls} bg-pink-soft text-pink-dark`}>
+            <span
+              className={`shrink-0 ${statusPillCls} bg-pink-soft text-pink-dark`}
+            >
               {completedCount} of {cards.length} modules complete
             </span>
           </div>

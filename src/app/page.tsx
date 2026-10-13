@@ -72,6 +72,7 @@ export default async function Home() {
 
   let account: {
     firstName?: string;
+    fullName?: string;
     salonName?: string;
     isAdmin?: boolean;
     completedCount: number;
@@ -92,6 +93,7 @@ export default async function Home() {
     ]);
     account = {
       firstName: profile?.full_name?.split(" ")[0],
+      fullName: profile?.full_name || undefined,
       salonName: profile?.salon_name ?? undefined,
       isAdmin: profile?.is_admin ?? undefined,
       completedCount: (progress ?? []).length,
@@ -103,7 +105,17 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <SiteHeader user={account ? { isAdmin: account.isAdmin } : undefined} />
+      <SiteHeader
+        user={
+          account
+            ? {
+                isAdmin: account.isAdmin,
+                name: account.fullName,
+                email: user?.email,
+              }
+            : undefined
+        }
+      />
 
       <main className="flex-1">
         {/* Hero: same soft grey-to-white gradient band as itsnotgossip.org */}

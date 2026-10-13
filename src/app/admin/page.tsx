@@ -147,7 +147,13 @@ export default async function AdminPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader user={{ isAdmin: true }} />
+      <SiteHeader
+        user={{
+          isAdmin: true,
+          name: me?.full_name || undefined,
+          email: user.email,
+        }}
+      />
 
       <main className="flex-1">
         <HeroBand>

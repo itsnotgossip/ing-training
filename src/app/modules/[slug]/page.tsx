@@ -46,6 +46,8 @@ export default async function ModulePage({
       userId={user.id}
       headerUser={{
         isAdmin: profile?.is_admin,
+        name: profile?.full_name || undefined,
+        email: user.email,
       }}
       // A finished module opens at the beginning, since "Revisit module"
       // means reading it again rather than returning to the last page.
