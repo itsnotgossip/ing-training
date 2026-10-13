@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -30,6 +37,12 @@ type Props = {
   // Preview mode: no database writes, nothing is saved.
   preview?: boolean;
 };
+
+// Runs before the browser paints, so the reader never sees the old scroll
+// position on the new step. Falls back to useEffect on the server, where
+// layout effects do not run and React would warn about it.
+const useBeforePaint =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 const SCALE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -67,6 +80,13 @@ export function ModulePlayer({
   const [completed, setCompleted] = useState(alreadyCompleted);
   const [saveError, setSaveError] = useState<string | null>(null);
   const completing = useRef(false);
+
+  // Put the reader at the top of each new step. This runs after the step has
+  // rendered, and overrides the page's smooth scrolling: an animated scroll
+  // races the content swap and can leave them mid-page. See globals.css.
+  useBeforePaint(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [cur]);
 
   const saveProgress = useCallback(
     (step: number, correct: Record<string, boolean>) => {
@@ -134,10 +154,7 @@ export function ModulePlayer({
       setCur((prev) => {
         const target = Math.max(0, Math.min(prev + delta, steps.length - 1));
         if (delta > 0 && !stepSatisfied(steps[prev], prev)) return prev;
-        if (target !== prev) {
-          saveProgress(target, quizCorrect);
-          window.scrollTo({ top: 0 });
-        }
+        if (target !== prev) saveProgress(target, quizCorrect);
         return target;
       });
     },
